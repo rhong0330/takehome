@@ -44,8 +44,7 @@ The Comment App is an Android application built using modern development practic
   ```
 
 ## Screenshots
-![Screenshot1](path/to/screenshot1.png)
-![Screenshot2](path/to/screenshot2.png)
+![Screenshot1](assets/screenshot1.png)
 
 ## Future Enhancements
 - **Pagination**: Adding pagination for better handling of large data sets.
