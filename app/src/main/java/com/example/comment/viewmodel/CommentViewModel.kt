@@ -1,26 +1,18 @@
 package com.example.comment.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.comment.model.Comment
 import com.example.comment.network.CommentApiService
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
-class CommentViewModel : ViewModel() {
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://jsonplaceholder.typicode.com/")
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+class CommentViewModel(private val apiService: CommentApiService) : ViewModel() {
 
-    private val apiService = retrofit.create(CommentApiService::class.java)
+    private val _comments = MutableLiveData<List<Comment>>(emptyList())
 
-    private val _comments = MutableStateFlow<List<Comment>>(emptyList())
-    val comments: StateFlow<List<Comment>> get() = _comments
+    val comments: LiveData<List<Comment>> get() = _comments
 
     init {
         fetchComments(1)
@@ -29,7 +21,13 @@ class CommentViewModel : ViewModel() {
     fun fetchComments(postId: Int) {
         viewModelScope.launch {
             try {
-                _comments.value = apiService.getComments(postId)
+                val response = apiService.getComments(postId)
+                if (response.isSuccessful) {
+                    _comments.value = response.body() ?: emptyList() // Handle null body
+                } else {
+                    _comments.value = emptyList() // Handle non-successful response
+                    // Optionally, handle the error case (e.g., log the error or set an error state)
+                }
             } catch (e: Exception) {
                 // Handle error (logging, display error state, etc.)
             }
